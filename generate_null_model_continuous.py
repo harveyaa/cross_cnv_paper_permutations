@@ -57,21 +57,19 @@ def get_year(s):
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("--contrast",help="contrast to run",dest='contrast')
+    parser.add_argument("--path_pheno",help="path to phenotype table",dest='path_pheno')
+    parser.add_argument("--path_connectomes",help="path to connectomes .npy file",dest='path_connectomes')
+    parser.add_argument("--path_out",help="path to output directory",dest='path_out')
     args = parser.parse_args()
 
     n_iter = 5000
     contrast = args.contrast
-    
-    #pheno_p ='/home/harveyaa/Documents/fMRI/data/ukbb_9cohorts/pheno_drop_maillard_15q11_2del.csv'
-    #connectomes_p = '/home/harveyaa/Documents/fMRI/data/ukbb_9cohorts/connectomes_drop_maillard_15q11_2del.npy'
-    #out_p = '/home/harveyaa/Documents/fMRI/cnv_fmri/permutations/'
+    path_pheno = args.path_pheno
+    path_connectomes = args.path_connectomes
+    path_out = args.path_out
 
-    pheno_p ='/home/harveyaa/scratch/pheno_drop_maillard_15q11_2del.csv'
-    connectomes_p = '/home/harveyaa/scratch/connectomes_drop_maillard_15q11_2del.npy'
-    out_p = '/home/harveyaa/scratch/null_models_continuous/'
-    
-    pheno = pd.read_csv(pheno_p, index_col=0)
-    connectomes = np.load(connectomes_p)
+    pheno = pd.read_csv(path_pheno, index_col=0)
+    connectomes = np.load(path_connectomes)
 
     regressors_str_mc = ' + '.join(['AGE','C(SEX)', 'FD_scrubbed', 'C(SITE)','mean_conn'])
     regressors_str_nomc = ' + '.join(['AGE','C(SEX)', 'FD_scrubbed', 'C(SITE)'])
@@ -105,14 +103,14 @@ if __name__ == "__main__":
     
     #FIX FOR NAMING
     if (contrast[-2:] == '_z'):
-        np.save(out_p + '{}_null_model_mc.npy'.format(contrast[:-2]), betas_mc)
+        np.save(path_out + '{}_null_model_mc.npy'.format(contrast[:-2]), betas_mc)
     else:
-        np.save(out_p + '{}_null_model_mc.npy'.format(contrast), betas_mc)
+        np.save(path_out + '{}_null_model_mc.npy'.format(contrast), betas_mc)
 
     betas_nomc = permutation_glm_continuous(p[mask], conn[mask], contrast,regressors=regressors_str_nomc, n_iter=n_iter, stand=False)
     
     #FIX FOR NAMING
     if (contrast[-2:] == '_z'):
-        np.save(out_p + '{}_null_model_nomc.npy'.format(contrast[:-2]), betas_nomc)
+        np.save(path_out + '{}_null_model_nomc.npy'.format(contrast[:-2]), betas_nomc)
     else:
-        np.save(out_p + '{}_null_model_nomc.npy'.format(contrast), betas_nomc)
+        np.save(path_out + '{}_null_model_nomc.npy'.format(contrast), betas_nomc)
