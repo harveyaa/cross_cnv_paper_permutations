@@ -11,7 +11,6 @@ def get_year(s):
         return np.nan
 
 if __name__ == "__main__":
-    if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("--path_pheno",help="path to phenotype table",dest='path_pheno')
     parser.add_argument("--path_connectomes",help="path to connectomes dir",dest='path_connectomes')
