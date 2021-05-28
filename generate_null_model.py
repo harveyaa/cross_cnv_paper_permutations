@@ -6,21 +6,19 @@ from argparse import ArgumentParser
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("--case",help="case to run",dest='case')
+    parser.add_argument("--path_pheno",help="path to phenotype table",dest='path_pheno')
+    parser.add_argument("--path_connectomes",help="path to connectomes .npy file",dest='path_connectomes')
+    parser.add_argument("--path_out",help="path to output directory",dest='path_out')
     args = parser.parse_args()
 
     n_iter = 5000
     case = args.case
+    path_pheno = args.path_pheno
+    path_connectomes = args.path_connectomes
+    path_out = args.path_out
 
-    #pheno_p ='/home/harveyaa/Documents/fMRI/data/ukbb_9cohorts/pheno_drop_maillard_15q11_2del.csv'
-    #connectomes_p = '/home/harveyaa/Documents/fMRI/data/ukbb_9cohorts/connectomes_drop_maillard_15q11_2del.npy'
-    #out_p = '/home/harveyaa/Documents/fMRI/cnv_fmri/permutations/'
-
-    pheno_p ='/home/harveyaa/scratch/pheno_drop_maillard_15q11_2del.csv'
-    connectomes_p = '/home/harveyaa/scratch/connectomes_drop_maillard_15q11_2del.npy'
-    out_p = '/home/harveyaa/scratch/null_models/'
-
-    pheno = pd.read_csv(pheno_p, index_col=0)
-    connectomes = np.load(connectomes_p)
+    pheno = pd.read_csv(path_pheno, index_col=0)
+    connectomes = np.load(path_connectomes)
     group = 'CNV_name'
 
     regressors_str_mc = ' + '.join(['AGE','C(SEX)', 'FD_scrubbed', 'C(SITE)','mean_conn'])
@@ -47,8 +45,8 @@ if __name__ == "__main__":
     if (case in ipc):
         control = 'CON_IPC'
 
-    cases = ['DEL1q21_1','DEL2q13','NRXN1del','DEL13q12_12','DEL15q11_2','DEL16p11_2','DEL16p13_11','DEL17p12','DEL22q11_2','TAR_dup',
-        'DUP1q21_1','DUP2q13','DUP13q12_12','DUP15q11_2','DUP15q13_3_CHRNA7','DUP16p11_2','DUP16p13_11','DUP17p12','DUP22q11_2',
+    cases = ['DEL1q21_1','DEL2q13','DEL13q12_12','DEL15q11_2','DEL16p11_2','DEL17p12','DEL22q11_2','TAR_dup',
+        'DUP1q21_1','DUP2q13','DUP13q12_12','DUP15q11_2','DUP15q13_3_CHRNA7','DUP16p11_2','DUP16p13_11','DUP22q11_2',
         'SZ','BIP','ASD','ADHD']
     
     df_pi = pheno.groupby('PI').sum()[cases]
@@ -66,10 +64,10 @@ if __name__ == "__main__":
 
     #DO MEAN CORRECTED
     betas_mc = cnvfc.stats.permutation_glm(pheno[mask], connectomes[mask], group, case, control,regressors=regressors_str_mc, n_iter=n_iter, stand=False)
-    np.save(out_p + '{}_null_model_mc.npy'.format(case), betas_mc)
+    np.save(path_out + '{}_null_model_mc.npy'.format(case), betas_mc)
 
     #DO NOMC
     betas_mc = cnvfc.stats.permutation_glm(pheno[mask], connectomes[mask], group, case, control,regressors=regressors_str_nomc, n_iter=n_iter, stand=False)
-    np.save(out_p + '{}_null_model_nomc.npy'.format(case), betas_mc)
+    np.save(path_out + '{}_null_model_nomc.npy'.format(case), betas_mc)
     
     
