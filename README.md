@@ -10,14 +10,9 @@ Method summary:
 - Significance of mirror effect (opposite mean shifts)
    - For loci with both DEL & DUP in dataset, for each pair (contrast1, contrast2):
       - Generate null model of differences b/w mean shifts
-         - Compute difference between mean shift of actual betamap of constrast1 with mean shift of 5000 pseudo-betamaps of constrast2
-         - Compute difference between mean shift of actual betamap of constrast2 with mean shift of 5000 pseudo-betamaps of contrast1
-         - Get distribution of 5000 + 5000 = 10,000 differences
       - Compare difference b/w mean shift of actual betamaps for contrast1 and contrast2  with distribution of differences to get pvalue
 - Significance of correlations
     - For each pair (contrast1, contrast2):
        - Generate null model of correlations
-         - Compute correlation between actual betamap of constrast1 with 5000 pseudo-betamaps of constrast2
-         - Compute correlation between actual betamap of constrast2 with 5000 pseudo-betamaps of costrast1
-         - Get distribution of 5000 + 5000 = 10,000 correlations
-       - Compare difference b/w mean shift of actual betamaps for contrast1 and contrast2  with distribution of differences to get pvalue
+         - Compute correlation between 5000 pairs of betamaps from null models of contrast1 and contrast2
+       - Compare difference b/w correlation of actual betamaps for contrast1 and contrast2  with distribution of correlations to get pvalue
