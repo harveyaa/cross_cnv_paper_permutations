@@ -57,8 +57,8 @@ def get_year(s):
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("--contrast",help="contrast to run",dest='contrast')
-    parser.add_argument("--path_pheno",help="path to phenotype table",dest='path_pheno')
-    parser.add_argument("--path_connectomes",help="path to connectomes .npy file",dest='path_connectomes')
+    parser.add_argument("--path_pheno",help="path to phenotype .csv file",dest='path_pheno')
+    parser.add_argument("--path_connectomes",help="path to connectomes .csv file",dest='path_connectomes')
     parser.add_argument("--path_out",help="path to output directory",dest='path_out')
     args = parser.parse_args()
 
@@ -69,7 +69,7 @@ if __name__ == "__main__":
     path_out = args.path_out
 
     pheno = pd.read_csv(path_pheno, index_col=0)
-    connectomes = np.load(path_connectomes)
+    connectomes = pd.read_csv(path_connectomes,index_col=0)
 
     regressors_str_mc = ' + '.join(['AGE','C(SEX)', 'FD_scrubbed', 'C(SITE)','mean_conn'])
     regressors_str_nomc = ' + '.join(['AGE','C(SEX)', 'FD_scrubbed', 'C(SITE)'])
@@ -97,7 +97,7 @@ if __name__ == "__main__":
     mask = np.array(~p[contrast].isnull())
     
     match_conn_mask = pheno.index.isin(p.index)
-    conn = connectomes[match_conn_mask]
+    conn = connectomes.to_numpy()[match_conn_mask]
     
     betas_mc = permutation_glm_continuous(p[mask], conn[mask], contrast,regressors=regressors_str_mc, n_iter=n_iter, stand=False)
     
