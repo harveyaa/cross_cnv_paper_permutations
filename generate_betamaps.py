@@ -12,8 +12,8 @@ def get_year(s):
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument("--path_pheno",help="path to phenotype table",dest='path_pheno')
-    parser.add_argument("--path_connectomes",help="path to connectomes dir",dest='path_connectomes')
+    parser.add_argument("--path_pheno",help="path to phenotype .csv file",dest='path_pheno')
+    parser.add_argument("--path_connectomes",help="path to connectomes .csv file",dest='path_connectomes')
     parser.add_argument("--path_out",help="path to output directory",dest='path_out')
     args = parser.parse_args()
     
@@ -22,13 +22,11 @@ if __name__ == "__main__":
     #############
 
     path_pheno = args.path_pheno
-    path_connectomes = os.path.join(args.path_connectomes,'connectome_{}_cambridge64.npy')
+    path_connectomes = args.path_connectomes
     path_out = args.path_out
 
     pheno = pd.read_csv(path_pheno,index_col=0)
-
-    mask = np.tri(64,dtype=bool)
-    connectomes = np.array([np.load(path_connectomes.format(sub_id))[mask] for sub_id in pheno.index])
+    connectomes = pd.read_csv(path_connectomes,index_col=0)
 
     regressors_mc = ['AGE','C(SEX)','FD_scrubbed', 'C(SITE)', 'mean_conn']
     regressors_nomc = ['AGE','C(SEX)','FD_scrubbed', 'C(SITE)']
@@ -37,7 +35,7 @@ if __name__ == "__main__":
     # CASE CONTROL #
     ################
 
-    cases = ['DEL1q21_1','DEL2q13','DEL13q12_12','DEL15q11_2','DEL16p11_2','DEL17p12','DEL22q11_2','TAR_dup',
+    cases = ['IBD','DEL1q21_1','DEL2q13','DEL13q12_12','DEL15q11_2','DEL16p11_2','DEL17p12','DEL22q11_2','TAR_dup',
             'DUP1q21_1','DUP2q13','DUP13q12_12','DUP15q11_2','DUP15q13_3_CHRNA7','DUP16p11_2','DUP16p13_11','DUP22q11_2',
             'SZ','BIP','ASD','ADHD']
     ipc = ['SZ','BIP','ASD','ADHD']
@@ -50,6 +48,10 @@ if __name__ == "__main__":
     for case in cases:
         if case in ipc:
             mask = util.mask_cc(pheno,case,'CON_IPC')
+        if case == 'IBD':
+            mask_case = (pheno['IBD_str'] == 'IBD_K50_K51').to_numpy(dtype=bool)
+            mask_con = (pheno['IBD_str'] == 'no_IBD').to_numpy(dtype=bool)
+            mask = mask_case + mask_con
         else:
             mask_case = pheno[case].to_numpy(dtype=bool)
             pi_list = df_pi[mask_pi[case]].index.to_list()
@@ -57,7 +59,7 @@ if __name__ == "__main__":
             mask = mask_case + mask_con
             print(case,pi_list)
 
-        summary = util.case_control(pheno[mask],case,regressors_mc,connectomes[mask],std=True)
+        summary = util.case_control(pheno[mask],case,regressors_mc,connectomes.to_numpy()[mask],std=True)
         summary.to_csv(path_out + '/cc_{}_results_mc.csv'.format(case))
         np.savetxt(path_out + '/cc_{}_mc.tsv'.format(case),util.vec_to_connectome(summary['betas_std'].to_numpy()),delimiter='\t')
 
@@ -69,13 +71,17 @@ if __name__ == "__main__":
     for case in cases:
         if case in ipc:
             mask = util.mask_cc(pheno,case,'CON_IPC')
+        if case == 'IBD':
+            mask_case = (pheno['IBD_str'] == 'IBD_K50_K51').to_numpy(dtype=bool)
+            mask_con = (pheno['IBD_str'] == 'no_IBD').to_numpy(dtype=bool)
+            mask = mask_case + mask_con
         else:
             mask_case = pheno[case].to_numpy(dtype=bool)
             pi_list = df_pi[mask_pi[case]].index.to_list()
             mask_con = np.array((pheno['PI'].isin(pi_list))&(pheno['non_carriers']==1))
             mask = mask_case + mask_con
             print(case,pi_list)
-        summary = util.case_control(pheno[mask],case,regressors_nomc,connectomes[mask],std=True)
+        summary = util.case_control(pheno[mask],case,regressors_nomc,connectomes.to_numpy()[mask],std=True)
         summary.to_csv(path_out + '/cc_{}_results_nomc.csv'.format(case))
         np.savetxt(path_out + '/cc_{}_nomc.tsv'.format(case),util.vec_to_connectome(summary['betas_std'].to_numpy()),delimiter='\t')
         summaries_nomc.append(summary)
@@ -114,7 +120,7 @@ if __name__ == "__main__":
         mask = util.mask_var(p,c)
 
         match_conn_mask = pheno.index.isin(p.index)
-        conn = connectomes[match_conn_mask]
+        conn = connectomes.to_numpy()[match_conn_mask]
 
         summary = util.variable_effect(p[mask],c,regressors_mc,conn[mask],std=True)
         summary.to_csv(path_out + '/cont_{}_results_mc.csv'.format(c))
@@ -148,7 +154,7 @@ if __name__ == "__main__":
         mask = util.mask_var(p,c)
 
         match_conn_mask = pheno.index.isin(p.index)
-        conn = connectomes[match_conn_mask]
+        conn = connectomes.to_numpy()[match_conn_mask]
 
         summary = util.variable_effect(p[mask],c,regressors_nomc,conn[mask],std=True)
         summary.to_csv(path_out + '/cont_{}_results_nomc.csv'.format(c))
