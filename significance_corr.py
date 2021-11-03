@@ -18,7 +18,7 @@ def p_permut(empirical_value, permutation_values):
     return (np.sum(permutation_values < empirical_value)+1) / (n_permutation + 1)
 
 def filter_fdr(df,contrasts):
-    df_filtered = df[(df['pair0'].isin(contrasts)) & (df['pair1'].isin(contrasts))]
+    df_filtered = df[(df['pair0'].isin(contrasts)) & (df['pair1'].isin(contrasts))].copy()
     _,fdr,_,_ = multipletests(df_filtered['pval'],method='fdr_bh')
     df_filtered['fdr_filtered'] = fdr
     return df_filtered
@@ -54,6 +54,7 @@ def get_corr_dist(cases,nulls,path_out,tag='wholeconn'):
     n_pairs = int((len(cases))*(len(cases) -1)/2)
     corr = np.zeros((n_pairs,5000))
 
+    print('Getting correlation between 5000 null maps for {} unique pairs for {} cases...'.format(n_pairs,len(cases)))
     pair = []
     l = 0
     for i in itertools.combinations(cases,2):
@@ -74,7 +75,8 @@ def get_corr(cases,betas,path_out,tag='wholeconn'):
     #For each unique pair, correlation between betamaps. Use standardized betas here (as in rest of paper).
     n_pairs = int((len(cases))*(len(cases) -1)/2)
     corr = np.zeros(n_pairs)
-
+    
+    print('Getting correlation between betamaps for {} unique pairs for {} cases...'.format(n_pairs,len(cases)))
     pair = []
     l = 0
     for i in itertools.combinations(cases,2):
@@ -93,6 +95,7 @@ def get_corr_pval(maps,nulls,betas,path_out,tag='wholeconn'):
     df_bb = df_bb.rename(columns={0:'betamap_corr'})
     df_master = df_bb.merge(df,on='pair')
     
+    print('Calculating pvals...')
     # CALCULATE PVALS
     pval = []
     for i in df_master.index:
@@ -113,22 +116,24 @@ def get_corr_pval(maps,nulls,betas,path_out,tag='wholeconn'):
     
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument("--n_path_mc",help="path to phenotype table",dest='path_pheno')
-    parser.add_argument("--cont_n_path_mc",help="path to connectomes .npy file",dest='path_connectomes')
-    parser.add_argument("--b_path_mc",help="path to output directory",dest='path_out')
-    parser.add_argument("--cont_b_path_mc",help="path to output directory",dest='path_out')
+    parser.add_argument("--n_path_mc",help="path to mc null models dir",dest='n_path_mc')
+    parser.add_argument("--b_path_mc",help="path to mc betamaps dir",dest='b_path_mc')
+    parser.add_argument("--path_out",help="path to output directory",dest='path_out')
+    parser.add_argument("--path_corr",help="path to corr dir",dest='path_corr',default=None)
     args = parser.parse_args()
     
-    n_path_mc = args.n_path_mc
-    cont_n_path_mc = args.cont_n_path_mc
-    b_path_mc = args.b_path_mc
-    cont_b_path_mc = args.cont_b_path_mc
+    n_path_mc = os.path.join(args.n_path_mc,'{}_null_model_mc.npy')
+    cont_n_path_mc = os.path.join(args.n_path_mc,'{}_null_model_mc.npy')
+    b_path_mc = os.path.join(args.b_path_mc,'cc_{}_results_mc.csv')
+    cont_b_path_mc = os.path.join(args.b_path_mc,'cont_{}_results_mc.csv')
+    path_out = args.path_out
+    path_corr = args.path_corr
 
-    cases = ['DEL15q11_2','DUP15q11_2','DUP15q13_3_CHRNA7','DEL2q13','DUP2q13','DUP16p13_11','DEL13q12_12','DUP13q12_12',
+    cases = ['IBD','DEL15q11_2','DUP15q11_2','DUP15q13_3_CHRNA7','DEL2q13','DUP2q13','DUP16p13_11','DEL13q12_12','DUP13q12_12',
         'DEL17p12','TAR_dup','DEL1q21_1','DUP1q21_1','DEL22q11_2','DUP22q11_2','DEL16p11_2','DUP16p11_2',
       'SZ','BIP','ASD','ADHD']
-    prs = ['Stand_PRS_newCDG2_ukbb','Stand_PRS_ASD','Stand_PRS_SCZ','Stand_PRS_MDD','Stand_PRS_IQ', 'Stand_PRS_height',
-           'Stand_PRS_LDL','Stand_PRS_CKD','Stand_PRS_SA','Stand_PRS_thickness','Stand_PRS_IBD_ukbb']
+    prs = ['Stand_PRS_newCDG2_ukbb','Stand_PRS_ASD','Stand_PRS_SCZ','Stand_PRS_MDD','Stand_PRS_IQ',
+           'Stand_PRS_LDL','Stand_PRS_CKD','Stand_PRS_SA','Stand_PRS_thickness','Stand_PRS_IBD_ukbb'] #'Stand_PRS_height'
     cont = prs + ['CT','SA','Vol','fluid_intelligence_score_all','Gfactor','Neuroticism']
 
     maps = cases + cont
@@ -153,11 +158,6 @@ if __name__ == "__main__":
     betamaps_std = pd.DataFrame(beta_std,index=maps)
     nullmodels = pd.concat(null,keys=maps)
     
-    ####################
-    # WHOLE CONNECTOME #
-    ####################
-    df = get_corr_pval(maps,nullmodels,betamaps_std,path_out,tag='wholeconn')
-    
     #####################
     # MAKE REGION MASKS #
     #####################
@@ -175,42 +175,61 @@ if __name__ == "__main__":
     MOTnet_dl_mask = np.tril(MOTnet_dl_mask)
     MOTnet_dl_mask = MOTnet_dl_mask[mask]
     
-    ############
-    # THALAMUS #
-    ############
+    ###########################################
+    # LOAD READY CORRELATIONS & DISTRIBUTIONS #
+    ###########################################
+    if path_corr is not None:
+        print('Loading ready correlations & distributions...')
+        df_wc = pd.read_csv(os.path.join(path_corr,'corr_pval_null_v_null_wholeconn.csv'))
+        df_THAL = pd.read_csv(os.path.join(path_corr,'corr_pval_null_v_null_THAL.csv'))
+        df_MOT = pd.read_csv(os.path.join(path_corr,'corr_pval_null_v_null_MOT.csv'))
     
-    # FILTER MAPS
-    null_THAL = [n.transpose()[THAL_mask].transpose() for n in null]
-    beta_std_THAL = [b[THAL_mask] for b in beta_std]
+    else:
+        ####################
+        # WHOLE CONNECTOME #
+        ####################
+        print('Creating correlation distributions for whole connectome...')
+        df_wc = get_corr_pval(maps,nullmodels,betamaps_std,path_out,tag='wholeconn')
 
-    betamaps_std_THAL = pd.DataFrame(beta_std_THAL,index=maps)
-    nullmodels_THAL = pd.concat(null_THAL,keys=maps)
-    
-    df_THAL = get_corr_pval(maps,nullmodels_THAL,betamaps_std_THAL,path_out,tag='THAL')
-    
-    #############
-    # MOTnet_DL #
-    #############
-    
-    # FILTER MAPS
-    null_MOT = [n.transpose()[MOTnet_dl_mask].transpose() for n in null]
-    beta_std_MOT = [b[MOTnet_dl_mask] for b in beta_std]
+        ############
+        # THALAMUS #
+        ############
 
-    betamaps_std_MOT = pd.DataFrame(beta_std_MOT,index=maps)
-    nullmodels_MOT = pd.concat(null_MOT,keys=maps)
-    
-    df_MOT = get_corr_pval(maps,nullmodels_MOT,betamaps_std_MOT,path_out,tag='THAL')
+        # FILTER MAPS
+        null_THAL = [n.transpose()[THAL_mask].transpose() for n in null]
+        beta_std_THAL = [b[THAL_mask] for b in beta_std]
+
+        betamaps_std_THAL = pd.DataFrame(beta_std_THAL,index=maps)
+        nullmodels_THAL = pd.concat(null_THAL,keys=maps)
+
+        print('Creating correlation distributions for THAL...')
+        df_THAL = get_corr_pval(maps,nullmodels_THAL,betamaps_std_THAL,path_out,tag='THAL')
+
+        #############
+        # MOTnet_DL #
+        #############
+
+        # FILTER MAPS
+        null_MOT = [n.transpose()[MOTnet_dl_mask].transpose() for n in null]
+        beta_std_MOT = [b[MOTnet_dl_mask] for b in beta_std]
+
+        betamaps_std_MOT = pd.DataFrame(beta_std_MOT,index=maps)
+        nullmodels_MOT = pd.concat(null_MOT,keys=maps)
+
+        print('Creating correlation distributions for MOTnet_DL...')
+        df_MOT = get_corr_pval(maps,nullmodels_MOT,betamaps_std_MOT,path_out,tag='MOT')
     
     #################
     # MAKE MATRICES #
     #################
     
+    print('Preparing correlation matrices...')
     # WHOLE CONNECTOME
     subset_WC = ['DEL1q21_1','DUP22q11_2','DEL22q11_2','Stand_PRS_ASD','BIP','SZ','Neuroticism',
               'Stand_PRS_MDD','ASD','Stand_PRS_SCZ','DEL15q11_2','DUP16p11_2','DEL16p11_2',
               'DUP1q21_1','Stand_PRS_SA','SA','CT','Gfactor','fluid_intelligence_score_all','Stand_PRS_IQ']
-
-    corr,pval,fdr = make_matrices(df_compact,subset_WC,fdr='fdr_filtered')
+    
+    corr,pval,fdr = make_matrices(df_wc,subset_WC,fdr='fdr_filtered')
     
     corr.to_csv(os.path.join(path_out,'FC_corr_fig4_wholebrain_mc_null_v_null.csv'))
     pval.to_csv(os.path.join(path_out,'FC_corr_pval_fig4_wholebrain_mc_null_v_null.csv'))
@@ -221,11 +240,11 @@ if __name__ == "__main__":
                'SA','Stand_PRS_ASD','DUP16p11_2','DEL1q21_1','DUP22q11_2','DEL16p11_2',
                'DUP1q21_1','DEL22q11_2','BIP','SZ','Neuroticism','ASD','DEL15q11_2',
               'Stand_PRS_SCZ','Stand_PRS_MDD']
-
-    corr_THAL,pval_THAL,fdr_THAL = make_matrices(df_compact_THAL,subset_THAL,fdr='fdr_filtered')
+    
+    corr_THAL,pval_THAL,fdr_THAL = make_matrices(df_THAL,subset_THAL,fdr='fdr_filtered')
     
     corr_THAL.to_csv(os.path.join(path_out,'FC_corr_fig5_THAL_mc_null_v_null.csv'))
-    pval_THAL.to_csv(os.path.join(path,'FC_corr_pval_fig5_THAL_mc_null_v_null.csv'))
+    pval_THAL.to_csv(os.path.join(path_out,'FC_corr_pval_fig5_THAL_mc_null_v_null.csv'))
     fdr_THAL.to_csv(os.path.join(path_out,'FC_corr_fdr_filtered_fig5_THAL_mc_null_v_null.csv'))
     
     # MOTnet_DL
@@ -233,9 +252,11 @@ if __name__ == "__main__":
                'Stand_PRS_SA','Stand_PRS_ASD','DUP1q21_1','DUP16p11_2','DEL16p11_2','Neuroticism',
                'Stand_PRS_MDD','DEL22q11_2','BIP','SZ','DEL15q11_2','Stand_PRS_SCZ','ASD',
               'DUP22q11_2','DEL1q21_1']
-
-    corr_MOT,pval_MOT,fdr_MOT = make_matrices(df_compact_MOT,subset_MOT,fdr='fdr_filtered')
+    
+    corr_MOT,pval_MOT,fdr_MOT = make_matrices(df_MOT,subset_MOT,fdr='fdr_filtered')
     
     corr_MOT.to_csv(os.path.join(path_out,'FC_corr_fig6_MOT_mc_null_v_null.csv'))
     pval_MOT.to_csv(os.path.join(path_out,'FC_corr_pval_fig6_MOT_mc_null_v_null.csv'))
     fdr_MOT.to_csv(os.path.join(path_out,'FC_corr_fdr_filtered_fig6_MOT_mc_null_v_null.csv'))
+    
+    print('Done!')

@@ -39,7 +39,7 @@ if __name__ == "__main__":
             'DUP1q21_1','DUP2q13','DUP13q12_12','DUP15q11_2','DUP15q13_3_CHRNA7','DUP16p11_2','DUP16p13_11','DUP22q11_2',
             'SZ','BIP','ASD','ADHD']
     ipc = ['SZ','BIP','ASD','ADHD']
-
+    
     df_pi = pheno.groupby('PI').sum()[cases]
     mask_pi = (df_pi > 0)
 
@@ -48,7 +48,7 @@ if __name__ == "__main__":
     for case in cases:
         if case in ipc:
             mask = util.mask_cc(pheno,case,'CON_IPC')
-        if case == 'IBD':
+        elif case == 'IBD':
             mask_case = (pheno['IBD_str'] == 'IBD_K50_K51').to_numpy(dtype=bool)
             mask_con = (pheno['IBD_str'] == 'no_IBD').to_numpy(dtype=bool)
             mask = mask_case + mask_con
@@ -71,7 +71,7 @@ if __name__ == "__main__":
     for case in cases:
         if case in ipc:
             mask = util.mask_cc(pheno,case,'CON_IPC')
-        if case == 'IBD':
+        elif case == 'IBD':
             mask_case = (pheno['IBD_str'] == 'IBD_K50_K51').to_numpy(dtype=bool)
             mask_con = (pheno['IBD_str'] == 'no_IBD').to_numpy(dtype=bool)
             mask = mask_case + mask_con
