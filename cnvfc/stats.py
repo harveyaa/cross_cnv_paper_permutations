@@ -7,7 +7,7 @@ import patsy as pat
 import pandas as pd
 from scipy import stats
 import statsmodels.api as sm
-from .tools import conn2mat
+#from .tools import conn2mat
 from sklearn import linear_model as sln
 from sklearn import preprocessing as skp
 from sklearn import model_selection as skm

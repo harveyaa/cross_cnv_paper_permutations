@@ -35,9 +35,9 @@ if __name__ == "__main__":
     # CASE CONTROL #
     ################
 
-    cases = ['IBD','DEL1q21_1','DEL2q13','DEL13q12_12','DEL15q11_2','DEL16p11_2','DEL17p12','DEL22q11_2','TAR_dup',
-            'DUP1q21_1','DUP2q13','DUP13q12_12','DUP15q11_2','DUP15q13_3_CHRNA7','DUP16p11_2','DUP16p13_11','DUP22q11_2',
-            'SZ','BIP','ASD','ADHD']
+    cases =['SZ','BIP','ASD','ADHD','IBD','DEL1q21_1','DEL2q13','DEL13q12_12','DEL15q11_2','DEL16p11_2',
+            'DEL17p12','DEL22q11_2','TAR_dup','DUP1q21_1','DUP2q13','DUP13q12_12','DUP15q11_2','DUP15q13_3_CHRNA7',
+            'DUP16p11_2','DUP16p13_11','DUP22q11_2']
     ipc = ['SZ','BIP','ASD','ADHD']
     
     df_pi = pheno.groupby('PI').sum()[cases]
@@ -90,8 +90,8 @@ if __name__ == "__main__":
     #####################
     # CONTINUOUS SCORES #
     #####################
-    prs = ['Stand_PRS_newCDG2_ukbb','Stand_PRS_ASD','Stand_PRS_SCZ','Stand_PRS_MDD','Stand_PRS_IQ',
-          'Stand_PRS_LDL','Stand_PRS_CKD','Stand_PRS_SA','Stand_PRS_thickness','Stand_PRS_IBD_ukbb']
+    prs = ['Stand_PRS_height','Stand_PRS_BMI','Stand_PRS_BIP','Stand_PRS_newCDG2_ukbb','Stand_PRS_ASD','Stand_PRS_SCZ',
+          'Stand_PRS_LDL','Stand_PRS_CKD','Stand_PRS_SA','Stand_PRS_MDD','Stand_PRS_IQ']
     cont = prs + ['CT','SA','Vol','fluid_intelligence_score_all','Gfactor','Neuroticism']
 
     # MEAN CORRECTED

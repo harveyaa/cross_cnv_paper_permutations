@@ -17,33 +17,27 @@ def p_permut(empirical_value, permutation_values):
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument("--n_path_mc",help="path to mc cc null models dir",dest='n_path_mc')
-    parser.add_argument("--n_path_mc_cont",help="path to mc cont null models dir",dest='n_path_mc_cont')
-    parser.add_argument("--b_path_mc",help="path to mc cc betamaps dir",dest='b_path_mc')
-    parser.add_argument("--b_path_mc_cont",help="path to mc cont betamaps dir",dest='b_path_mc_cont')
-    parser.add_argument("--n_path_nomc",help="path to nomc cc null models dir",dest='n_path_nomc')
-    parser.add_argument("--n_path_nomc_cont",help="path to nomc cont null models dir",dest='n_path_nomc_cont')
-    parser.add_argument("--b_path_nomc",help="path to nomc cc betamaps dir",dest='b_path_nomc')
-    parser.add_argument("--b_path_nomc_cont",help="path to nomc cont betamaps dir",dest='b_path_nomc_cont')
+    parser.add_argument("--n_path",help="path to mc cc null models dir",dest='n_path')
+    parser.add_argument("--b_path",help="path to mc cc betamaps dir",dest='b_path')
     parser.add_argument("--path_out",help="path to output directory",dest='path_out')
     args = parser.parse_args()
     
-    n_path_mc = os.path.join(args.n_path_mc,'{}_null_model_mc.npy')
-    b_path_mc = os.path.join(args.b_path_mc,'cc_{}_results_mc.csv')
-    n_path_mc_cont = os.path.join(args.n_path_mc_cont,'{}_null_model_mc.npy')
-    b_path_mc_cont = os.path.join(args.n_path_mc_cont,'cont_{}_results_mc.csv')
-    n_path_nomc = os.path.join(args.n_path_nomc,'{}_null_model_nomc.npy')
-    b_path_nomc = os.path.join(args.b_path_nomc,'cc_{}_results_nomc.csv')
-    n_path_nomc_cont = os.path.join(args.n_path_nomc_cont,'{}_null_model_nomc.npy')
-    b_path_nomc_cont = os.path.join(args.n_path_nomc_cont,'cont_{}_results_nomc.csv')
+    n_path_mc = os.path.join(args.n_path,'{}_null_model_mc.npy')
+    b_path_mc = os.path.join(args.b_path,'cc_{}_results_mc.csv')
+    n_path_mc_cont = os.path.join(args.n_path,'{}_null_model_mc.npy')
+    b_path_mc_cont = os.path.join(args.b_path,'cont_{}_results_mc.csv')
+    n_path_nomc = os.path.join(args.n_path,'{}_null_model_nomc.npy')
+    b_path_nomc = os.path.join(args.b_path,'cc_{}_results_nomc.csv')
+    n_path_nomc_cont = os.path.join(args.n_path,'{}_null_model_nomc.npy')
+    b_path_nomc_cont = os.path.join(args.b_path,'cont_{}_results_nomc.csv')
     path_out = args.path_out
     
     all_groups = ['DEL15q11_2','DUP15q11_2','DUP15q13_3_CHRNA7','DEL2q13','DUP2q13','DUP16p13_11','DEL13q12_12','DUP13q12_12',
         'DEL17p12','TAR_dup','DEL1q21_1','DUP1q21_1','DEL22q11_2','DUP22q11_2','DEL16p11_2','DUP16p11_2',
-      'SZ','BIP','ASD','ADHD']
-    prs = ['Stand_PRS_newCDG2_ukbb','Stand_PRS_ASD','Stand_PRS_SCZ','Stand_PRS_MDD','Stand_PRS_IQ', 'Stand_PRS_height',
-           'Stand_PRS_LDL','Stand_PRS_CKD','Stand_PRS_SA','Stand_PRS_thickness']
-    cont = prs + ['CT','SA','Vol','fluid_intelligence_score_all','Gfactor','Neuroticism']
+      'SZ','BIP','ASD','ADHD','IBD']
+    prs = ['Stand_PRS_newCDG2_ukbb','Stand_PRS_ASD','Stand_PRS_SCZ','Stand_PRS_IQ',
+           'Stand_PRS_LDL','Stand_PRS_CKD','Stand_PRS_BIP','Stand_PRS_height','Stand_PRS_BMI']
+    cont = prs + ['fluid_intelligence_score_all','Neuroticism']
     
     #############
     # LOAD DATA #
@@ -98,7 +92,7 @@ if __name__ == "__main__":
         mean_shift_maps.append(np.mean(b_map))
 
     mean_shift_pval = pd.DataFrame(np.array([mean_shift_maps,p_val]).transpose(),index=all_groups+cont,columns=['beta_map_mean','p_permut'])
-    mean_shift_pval.to_csv(os.path.join(path_out,'mean_shift_pval_unstandardized_29-03-21.csv'))
+    mean_shift_pval.to_csv(os.path.join(path_out,'mean_shift_pval_unstandardized_14-12-21.csv'))
     
     ############
     # VARIANCE #
@@ -121,4 +115,4 @@ if __name__ == "__main__":
         var_maps.append(np.var(b_map))
 
     var_pval = pd.DataFrame(np.array([var_maps,p_val_var]).transpose(),index=all_groups+cont,columns=['beta_map_var','p_permut'])
-    var_pval.to_csv(os.path.join(path_out,'var_pval_unstandardized_29-03-21.csv'))
+    var_pval.to_csv(os.path.join(path_out,'var_pval_unstandardized_14-12-21.csv'))
