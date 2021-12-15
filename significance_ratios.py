@@ -41,20 +41,20 @@ if __name__ == "__main__":
     #############
     print('Loading Data...')
     null = []
-    beta_std = []
+    beta = []
 
     for c in cases:
         null.append(pd.DataFrame(np.load(n_path_mc.format(c))))
-        beta_std.append(pd.read_csv(b_path_mc.format(c))['betas_std'].values) #standardized betas
+        beta.append(pd.read_csv(b_path_mc.format(c))['betas'].values)
 
 
     for c in cont:
         null.append(pd.DataFrame(np.load(cont_n_path_mc.format(c))))
         if c not in prs:
             c = '{}_z'.format(c)
-        beta_std.append(pd.read_csv(cont_b_path_mc.format(c))['betas_std'].values) #standardized betas
+        beta.append(pd.read_csv(cont_b_path_mc.format(c))['betas'].values)
 
-    betamaps = pd.DataFrame(beta_std,index=maps)
+    betamaps = pd.DataFrame(beta,index=maps)
     nullmodels = pd.concat(null,keys=maps)
     print('Done!')
     
@@ -72,7 +72,7 @@ if __name__ == "__main__":
         table.append(desc)
     table = pd.DataFrame(table,columns=['min','max','mean','mean_abs','mean_top_dec'],index=betamaps.index)
     print('Saving...')
-    table.to_csv(os.path.join(path_out,'mean_top_dec.csv'))
+    table.to_csv(os.path.join(path_out,'mean_top_dec_unstd.csv'))
     print('Done!')
     
     ##################
@@ -94,7 +94,7 @@ if __name__ == "__main__":
         rows.append(row)
 
     summary_ratios = pd.DataFrame(rows,columns=['big','small','mean_top_dec_ratio'])
-    summary_ratios.to_csv(os.path.join(path_out,'mean_top_dec_ratios.csv'))
+    summary_ratios.to_csv(os.path.join(path_out,'mean_top_dec_ratios_unstd.csv'))
     print('Done!')
     
     ########################
@@ -130,9 +130,9 @@ if __name__ == "__main__":
     ###############################
     # GET NULL DIST OF MTD RATIOS #
     ###############################
-    if os.path.exists(os.path.join(path_out,'mtd_dist_ratios_observed_denom.csv')):
+    if os.path.exists(os.path.join(path_out,'mtd_dist_ratios_observed_denom_unstd.csv')):
         print('Loading null distributions of mean top decile ratios...')
-        summary_ratios_dist = pd.read_csv(os.path.join(path_out,'mtd_dist_ratios_observed_denom.csv'),index_col=0)
+        summary_ratios_dist = pd.read_csv(os.path.join(path_out,'mtd_dist_ratios_observed_denom_unstd.csv'),index_col=0)
         print('Done!')
     else:
         print('Null distributions of mean top decile ratios not found.')
@@ -161,7 +161,7 @@ if __name__ == "__main__":
 
         summary_ratios_dist = pd.DataFrame(rows_dist,columns=['big','small','iter','mean_top_dec_ratio'])
         print('Saving...')
-        summary_ratios_dist.to_csv(os.path.join(path_out,'mtd_dist_ratios_observed_denom.csv'))
+        summary_ratios_dist.to_csv(os.path.join(path_out,'mtd_dist_ratios_observed_denom_unstd.csv'))
         print('Done!')
 
     ########################
@@ -186,5 +186,5 @@ if __name__ == "__main__":
 
     sig_mean_top_dec_ratio = pd.DataFrame(rows_sig, columns = ['big','small','mean_top_dec_ratio','p_mean_top_dec_ratio'])
     print('Saving...')
-    sig_mean_top_dec_ratio.to_csv(os.path.join(path_out,'mtd_dist_ratios_observed_denom_sig.csv'))
+    sig_mean_top_dec_ratio.to_csv(os.path.join(path_out,'mtd_ratios_observed_denom_sig_unstd.csv'))
     print('Done!')
