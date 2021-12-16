@@ -115,7 +115,7 @@ if __name__ == "__main__":
         resample_idx = np.random.choice(idx,len(idx))
 
         # Generate betamap
-        table = variable_effect(pheno.loc[resample_idx],
+        table = variable_effect(p.loc[resample_idx],
                             c,
                             regressors_mc,
                             conn.loc[resample_idx])
