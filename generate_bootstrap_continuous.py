@@ -62,7 +62,7 @@ if __name__ == "__main__":
     parser.add_argument("--path_out",help="path to output directory",dest='path_out')
     args = parser.parse_args()
 
-    n_iter = 5000
+    n_iter = 5#000
     c = args.case
     path_pheno = args.path_pheno
     path_connectomes = args.path_connectomes
@@ -95,12 +95,13 @@ if __name__ == "__main__":
         p['{}_z'.format(c)] = (p[c] - p[c].mean())/p[c].std(ddof=0)
         c = '{}_z'.format(c)
 
-    mask = np.array(~pheno[c].isnull())
+    mask = np.array(~p[c].isnull())
+    p = p[mask]
 
     match_conn_mask = pheno.index.isin(p.index)
     conn = connectomes[match_conn_mask]
 
-    idx = pheno[mask].index
+    idx = p.index
     
     ######################
     # GENERATE BOOTSTRAP #
