@@ -62,7 +62,7 @@ if __name__ == "__main__":
     parser.add_argument("--path_out",help="path to output directory",dest='path_out')
     args = parser.parse_args()
 
-    n_iter = 5#000
+    n_iter = 5000
     c = args.case
     path_pheno = args.path_pheno
     path_connectomes = args.path_connectomes
