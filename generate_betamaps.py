@@ -91,9 +91,9 @@ if __name__ == "__main__":
     # CONTINUOUS SCORES #
     #####################
     prs = ['Stand_PRS_height','Stand_PRS_BMI','Stand_PRS_BIP','Stand_PRS_newCDG2_ukbb','Stand_PRS_ASD','Stand_PRS_SCZ',
-          'Stand_PRS_LDL','Stand_PRS_CKD','Stand_PRS_SA','Stand_PRS_MDD','Stand_PRS_IQ']
+          'Stand_PRS_LDL','Stand_PRS_CKD','Stand_PRS_SA','Stand_PRS_MDD','Stand_PRS_IQ','Stand_PRS_SCZwave3']
     cont = prs + ['CT','SA','Vol','fluid_intelligence_score_all','Gfactor','Neuroticism']
-
+    
     # MEAN CORRECTED
     summaries_cont_mc = []
     for c in cont:
