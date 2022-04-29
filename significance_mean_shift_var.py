@@ -35,7 +35,7 @@ if __name__ == "__main__":
     all_groups = ['DEL15q11_2','DUP15q11_2','DUP15q13_3_CHRNA7','DEL2q13','DUP2q13','DUP16p13_11','DEL13q12_12','DUP13q12_12',
         'DEL17p12','TAR_dup','DEL1q21_1','DUP1q21_1','DEL22q11_2','DUP22q11_2','DEL16p11_2','DUP16p11_2',
       'SZ','BIP','ASD','ADHD','IBD']
-    prs = ['Stand_PRS_newCDG2_ukbb','Stand_PRS_ASD','Stand_PRS_SCZ','Stand_PRS_IQ',
+    prs = ['Stand_PRS_newCDG2_ukbb','Stand_PRS_ASD','Stand_PRS_SCZwave3','Stand_PRS_IQ',
            'Stand_PRS_LDL','Stand_PRS_CKD','Stand_PRS_BIP','Stand_PRS_height','Stand_PRS_BMI']
     cont = prs + ['fluid_intelligence_score_all','Neuroticism']
     
