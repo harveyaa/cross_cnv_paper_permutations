@@ -45,8 +45,8 @@ if __name__ == "__main__":
                         default='/home/harveyaa/projects/def-pbellec/harveyaa/data/connectomes_01-12-21.csv')
     parser.add_argument("--path_out",help="path to output directory")
     parser.add_argument("--prs",help="which prs")
-    parser.add_argument("--n_iter",help="number of iterations",type=int)
-    parser.add_argument("--n_sample",help="number of subjects in sample",type=int)
+    parser.add_argument("--n_iter",help="number of iterations",type=int,default=1000)
+    parser.add_argument("--n_sample",help="number of subjects in sample",type=int,default=450)
     args = parser.parse_args()
     
     #############
